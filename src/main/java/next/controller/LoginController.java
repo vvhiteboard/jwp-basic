@@ -11,7 +11,7 @@ public class LoginController implements Controller {
     private static final long serialVersionUID = 1L;
 
     @Override
-    public String service(HttpServletRequest request, HttpServletResponse response) throws Exception {
+    public String service(HttpServletRequest request, HttpServletResponse response) {
         String userId = request.getParameter("userId");
         String password = request.getParameter("password");
         User user = DataBase.findUserById(userId);

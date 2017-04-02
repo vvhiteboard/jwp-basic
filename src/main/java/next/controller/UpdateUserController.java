@@ -14,7 +14,7 @@ public class UpdateUserController implements Controller {
     private static final Logger log = LoggerFactory.getLogger(UpdateUserController.class);
 
     @Override
-    public String service(HttpServletRequest request, HttpServletResponse response) throws Exception {
+    public String service(HttpServletRequest request, HttpServletResponse response) {
         User user = DataBase.findUserById(request.getParameter("userId"));
 
         if (!UserSessionUtils.isSameUser(request.getSession(), user)) {

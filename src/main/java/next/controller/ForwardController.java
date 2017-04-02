@@ -18,7 +18,7 @@ public class ForwardController implements Controller {
     }
 
     @Override
-    public String service(HttpServletRequest request, HttpServletResponse response) throws Exception {
+    public String service(HttpServletRequest request, HttpServletResponse response) {
         return forwardUrl;
     }
 }

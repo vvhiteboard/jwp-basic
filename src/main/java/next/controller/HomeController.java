@@ -9,7 +9,7 @@ public class HomeController implements Controller {
     private static final long serialVersionUID = 1L;
 
     @Override
-    public String service(HttpServletRequest request, HttpServletResponse response) throws Exception {
+    public String service(HttpServletRequest request, HttpServletResponse response) {
         request.setAttribute("users", DataBase.findAll());
         return "index.jsp";
     }

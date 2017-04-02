@@ -1,4 +1,6 @@
-package next.controller;
+package core.web.dispatcher;
+
+import next.controller.*;
 
 import java.util.HashMap;
 import java.util.Map;

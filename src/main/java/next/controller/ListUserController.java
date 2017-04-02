@@ -9,7 +9,7 @@ public class ListUserController implements Controller {
     private static final long serialVersionUID = 1L;
 
     @Override
-    public String service(HttpServletRequest request, HttpServletResponse response) throws Exception {
+    public String service(HttpServletRequest request, HttpServletResponse response) {
         if (!UserSessionUtils.isLogined(request.getSession())) {
             return "redirect:/users/loginForm";
         }
