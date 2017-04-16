@@ -4,12 +4,11 @@ import next.model.User;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.List;
 
 public class UserDao {
 
-    public void insert(User user) throws SQLException {
+    public void insert(User user) {
         String sql = "INSERT INTO USERS VALUES (?, ?, ?, ?)";
 
         JdbcTemplate<User> jdbcTemplate = new JdbcTemplate();
@@ -24,7 +23,7 @@ public class UserDao {
         jdbcTemplate.update(sql, pstmtSetter);
     }
 
-    public void update(User user) throws SQLException {
+    public void update(User user) {
         String sql = "UPDATE USERS SET name = ?, email = ? WHERE userId = ?";
 
         JdbcTemplate<User> jdbcTemplate = new JdbcTemplate<>();
@@ -38,7 +37,7 @@ public class UserDao {
         jdbcTemplate.update(sql, pstmtSetter);
     }
 
-    public List<User> findAll() throws SQLException {
+    public List<User> findAll() {
         String sql = "SELECT userId, name, email FROM USERS";
 
         JdbcTemplate<User> jdbcTemplate = new JdbcTemplate<>();
@@ -53,7 +52,7 @@ public class UserDao {
         return jdbcTemplate.query(sql, pstmtSetter, userRowMapper);
     }
 
-    public User findByUserId(String userId) throws SQLException {
+    public User findByUserId(String userId) {
         String sql = "SELECT userId, password, name, email FROM USERS WHERE userid=?";
 
         JdbcTemplate<User> jdbcTemplate = new JdbcTemplate<>();

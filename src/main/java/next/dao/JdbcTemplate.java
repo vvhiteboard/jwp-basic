@@ -1,6 +1,7 @@
 package next.dao;
 
 import core.jdbc.ConnectionManager;
+import next.exception.DataAccessException;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -14,95 +15,57 @@ import java.util.List;
  */
 public class JdbcTemplate<T> {
 
-    public void update(String sql, PreparedStatementSetter pstmtSetter) throws SQLException {
-        Connection con = null;
-        PreparedStatement pstmt = null;
-
-        try {
-            con = ConnectionManager.getConnection();
-
-            pstmt = con.prepareStatement(sql);
+    public void update(String sql, PreparedStatementSetter pstmtSetter) {
+        try (Connection con = ConnectionManager.getConnection(); PreparedStatement pstmt = con.prepareStatement(sql)) {
             pstmtSetter.setValues(pstmt);
 
             pstmt.executeUpdate();
-        } finally {
-            if (pstmt != null) {
-                pstmt.close();
-            }
 
-            if ( con != null) {
-                con.close();
-            }
+        } catch (SQLException e) {
+            throw new DataAccessException(e);
         }
     }
 
-    public List<T> query(String sql, PreparedStatementSetter pstmtSetter, RowMapper<T> rowMapper) throws SQLException {
-        Connection con = null;
-        PreparedStatement pstmt = null;
-        ResultSet rs = null;
-        List<T> results = new ArrayList<>();
+    public List<T> query(String sql, PreparedStatementSetter pstmtSetter, RowMapper<T> rowMapper) {
 
-        try {
-            con = ConnectionManager.getConnection();
-            pstmt = con.prepareStatement(sql);
-
+        try (Connection con = ConnectionManager.getConnection(); PreparedStatement pstmt = con.prepareStatement(sql)) {
+            List<T> results = new ArrayList<>();
             pstmtSetter.setValues(pstmt);
-            rs = pstmt.executeQuery();
 
-            while (rs.next()) {
-                results.add(rowMapper.mapRow(rs));
+            try (ResultSet rs = pstmt.executeQuery()) {
+                while (rs.next()) {
+                    results.add(rowMapper.mapRow(rs));
+                }
+            } catch (SQLException e) {
+                throw new DataAccessException(e);
             }
 
             return results;
 
-        } finally { // Close 순서는 ResultSet -> PreparedStatement -> Connection 순
-            if (rs != null) {
-                rs.close();
-            }
+        } catch (SQLException e) {
+            throw new DataAccessException(e);
 
-            if (pstmt != null) {
-                pstmt.close();
-            }
-
-            if (con != null) {
-                con.close();
-            }
         }
     }
 
-    public T queryForObject(String sql, PreparedStatementSetter pstmtSetter, RowMapper<T> rowMapper) throws SQLException {
+    public T queryForObject(String sql, PreparedStatementSetter pstmtSetter, RowMapper<T> rowMapper) {
 
-        Connection con = null;
-        PreparedStatement pstmt = null;
-        ResultSet rs = null;
-        T result = null;
-
-        try {
-            con = ConnectionManager.getConnection();
-            pstmt = con.prepareStatement(sql);
-
+        try (Connection con = ConnectionManager.getConnection(); PreparedStatement pstmt = con.prepareStatement(sql)) {
+            T result = null;
             pstmtSetter.setValues(pstmt);
 
-            rs = pstmt.executeQuery();
+            try (ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) {
+                    result = rowMapper.mapRow(rs);
+                }
 
-            if (rs.next()) {
-                result = rowMapper.mapRow(rs);
+            } catch (SQLException e) {
+                throw new DataAccessException(e);
             }
 
             return result;
-
-        } finally { // Close 순서는 ResultSet -> PreparedStatement -> Connection 순
-            if (rs != null) {
-                rs.close();
-            }
-
-            if (pstmt != null) {
-                pstmt.close();
-            }
-
-            if (con != null) {
-                con.close();
-            }
+        } catch (SQLException e) {
+            throw new DataAccessException(e);
         }
     }
 }
