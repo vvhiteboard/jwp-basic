@@ -1,5 +1,8 @@
 package next.dao;
 
+import core.jdbc.ConnectionManager;
+import next.model.User;
+
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -7,41 +10,68 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-import core.jdbc.ConnectionManager;
-import next.model.User;
-
 public class UserDao {
+
+    void setValuesForInsert(User user, PreparedStatement pstmt) throws SQLException {
+        pstmt.setString(1, user.getUserId());
+        pstmt.setString(2, user.getPassword());
+        pstmt.setString(3, user.getName());
+        pstmt.setString(4, user.getEmail());
+    }
+
+    void setValuesForUpdate(User user, PreparedStatement pstmt) throws SQLException {
+        pstmt.setString(1, user.getName());
+        pstmt.setString(2, user.getEmail());
+        pstmt.setString(3, user.getUserId());
+    }
+
+    String createQueryForUpdate() {
+        return "UPDATE USERS SET name = ?, email = ? WHERE userId = ?";
+    }
+
+    String createQueryForInsert() {
+        return "INSERT INTO USERS VALUES (?, ?, ?, ?)";
+    }
+
     public void insert(User user) throws SQLException {
+        InsertJdbcTemplate insertJdbcTemplate = new InsertJdbcTemplate();
+        insertJdbcTemplate.insert(user, this);
+    }
+
+    public void update(User user) throws SQLException {
+        UpdateJdbcTemplate updateJdbcTemplate = new UpdateJdbcTemplate();
+        updateJdbcTemplate.update(user, this);
+    }
+
+    public List<User> findAll() throws SQLException {
         Connection con = null;
         PreparedStatement pstmt = null;
+        ResultSet result = null;
+
         try {
             con = ConnectionManager.getConnection();
-            String sql = "INSERT INTO USERS VALUES (?, ?, ?, ?)";
+            String sql = "SELECT userId, name, email FROM USERS";
             pstmt = con.prepareStatement(sql);
-            pstmt.setString(1, user.getUserId());
-            pstmt.setString(2, user.getPassword());
-            pstmt.setString(3, user.getName());
-            pstmt.setString(4, user.getEmail());
 
-            pstmt.executeUpdate();
+            result = pstmt.executeQuery();
+
+            List<User> users = new ArrayList<User>();
+            while (result.next()) {
+                users.add(new User(result.getString("userId"), "", result.getString("name"), result.getString("email")));
+            }
+
+            return users;
         } finally {
+            if (result != null) {
+                result.close();
+            }
             if (pstmt != null) {
                 pstmt.close();
             }
-
             if (con != null) {
                 con.close();
             }
         }
-    }
-
-    public void update(User user) throws SQLException {
-        // TODO 구현 필요함.
-    }
-
-    public List<User> findAll() throws SQLException {
-        // TODO 구현 필요함.
-        return new ArrayList<User>();
     }
 
     public User findByUserId(String userId) throws SQLException {
