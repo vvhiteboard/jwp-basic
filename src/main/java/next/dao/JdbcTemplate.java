@@ -12,29 +12,7 @@ import java.sql.SQLException;
  */
 public abstract class JdbcTemplate {
 
-    public void update() throws SQLException {
-        Connection con = null;
-        PreparedStatement pstmt = null;
-
-        try {
-            con = ConnectionManager.getConnection();
-            String sql = createQuery();
-
-            pstmt = con.prepareStatement(sql);
-            setValues(pstmt);
-
-            pstmt.executeUpdate();
-        } finally {
-            if ( con != null) {
-                con.close();
-            }
-            if (pstmt != null) {
-                pstmt.close();
-            }
-        }
-    }
-
-    public void update2(String sql) throws SQLException {
+    public void update(String sql) throws SQLException {
         Connection con = null;
         PreparedStatement pstmt = null;
 
@@ -46,16 +24,15 @@ public abstract class JdbcTemplate {
 
             pstmt.executeUpdate();
         } finally {
-            if ( con != null) {
-                con.close();
-            }
             if (pstmt != null) {
                 pstmt.close();
             }
+
+            if ( con != null) {
+                con.close();
+            }
         }
     }
-
-    abstract String createQuery();
 
     abstract void setValues(PreparedStatement pstmt) throws SQLException;
 }
