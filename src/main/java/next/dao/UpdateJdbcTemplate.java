@@ -10,16 +10,16 @@ import java.sql.SQLException;
 /**
  * Created by 77loo on 2017-04-16.
  */
-public class UpdateJdbcTemplate {
-    public void update(User user, UserDao userDao) throws SQLException {
+public abstract class UpdateJdbcTemplate {
+    public void update(User user) throws SQLException {
         Connection con = null;
         PreparedStatement pstmt = null;
         try {
             con = ConnectionManager.getConnection();
-            String sql = userDao.createQueryForUpdate();
+            String sql = createQueryForUpdate();
 
             pstmt = con.prepareStatement(sql);
-            userDao.setValuesForUpdate(user, pstmt);
+            setValuesForUpdate(user, pstmt);
 
             pstmt.execute();
 
@@ -32,4 +32,8 @@ public class UpdateJdbcTemplate {
             }
         }
     }
+
+    abstract String createQueryForUpdate();
+
+    abstract void setValuesForUpdate(User user, PreparedStatement pstmt)  throws SQLException;
 }
