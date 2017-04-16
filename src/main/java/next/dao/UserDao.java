@@ -2,7 +2,6 @@ package next.dao;
 
 import next.model.User;
 
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.List;
 
@@ -13,14 +12,7 @@ public class UserDao {
 
         JdbcTemplate<User> jdbcTemplate = new JdbcTemplate();
 
-        PreparedStatementSetter<User> pstmtSetter = (PreparedStatement pstmt) -> {
-            pstmt.setString(1, user.getUserId());
-            pstmt.setString(2, user.getPassword());
-            pstmt.setString(3, user.getName());
-            pstmt.setString(4, user.getEmail());
-        };
-
-        jdbcTemplate.update(sql, pstmtSetter);
+        jdbcTemplate.update(sql, user.getUserId(), user.getPassword(), user.getName(), user.getEmail());
     }
 
     public void update(User user) {
@@ -28,13 +20,7 @@ public class UserDao {
 
         JdbcTemplate<User> jdbcTemplate = new JdbcTemplate<>();
 
-        PreparedStatementSetter<User> pstmtSetter = (PreparedStatement pstmt) -> {
-            pstmt.setString(1, user.getName());
-            pstmt.setString(2, user.getEmail());
-            pstmt.setString(3, user.getUserId());
-        };
-
-        jdbcTemplate.update(sql, pstmtSetter);
+        jdbcTemplate.update(sql, user.getName(), user.getEmail(), user.getUserId());
     }
 
     public List<User> findAll() {
@@ -43,13 +29,9 @@ public class UserDao {
         JdbcTemplate<User> jdbcTemplate = new JdbcTemplate<>();
 
         // FuntionalInterface 람다식으로 함수형 인터페이스 정의
-        PreparedStatementSetter<User> pstmtSetter = (PreparedStatement pstmt) -> {
-        };
         RowMapper<User> userRowMapper = (ResultSet resultSet) -> new User(resultSet.getString("userId"), "", resultSet.getString("name"), resultSet.getString("email"));
 
-        jdbcTemplate.query(sql, pstmtSetter, userRowMapper);
-
-        return jdbcTemplate.query(sql, pstmtSetter, userRowMapper);
+        return jdbcTemplate.query(sql, userRowMapper);
     }
 
     public User findByUserId(String userId) {
@@ -58,9 +40,8 @@ public class UserDao {
         JdbcTemplate<User> jdbcTemplate = new JdbcTemplate<>();
 
         // FuntionalInterface 람다식으로 함수형 인터페이스 정의
-        PreparedStatementSetter<User> pstmtSetter = (PreparedStatement pstmt) -> pstmt.setString(1, userId);
         RowMapper<User> userRowMapper = (ResultSet resultSet) -> new User(resultSet.getString("userId"), "", resultSet.getString("name"), resultSet.getString("email"));
 
-        return jdbcTemplate.queryForObject(sql, pstmtSetter, userRowMapper);
+        return jdbcTemplate.queryForObject(sql, userRowMapper, userId);
     }
 }

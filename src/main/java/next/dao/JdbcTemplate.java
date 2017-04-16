@@ -15,9 +15,9 @@ import java.util.List;
  */
 public class JdbcTemplate<T> {
 
-    public void update(String sql, PreparedStatementSetter pstmtSetter) {
+    public void update(String sql, Object... parameters) {
         try (Connection con = ConnectionManager.getConnection(); PreparedStatement pstmt = con.prepareStatement(sql)) {
-            pstmtSetter.setValues(pstmt);
+            setParameters(pstmt, parameters);
 
             pstmt.executeUpdate();
 
@@ -26,11 +26,11 @@ public class JdbcTemplate<T> {
         }
     }
 
-    public List<T> query(String sql, PreparedStatementSetter pstmtSetter, RowMapper<T> rowMapper) {
+    public List<T> query(String sql, RowMapper<T> rowMapper, Object... paramaters) {
 
         try (Connection con = ConnectionManager.getConnection(); PreparedStatement pstmt = con.prepareStatement(sql)) {
             List<T> results = new ArrayList<>();
-            pstmtSetter.setValues(pstmt);
+            setParameters(pstmt, paramaters);
 
             try (ResultSet rs = pstmt.executeQuery()) {
                 while (rs.next()) {
@@ -48,11 +48,11 @@ public class JdbcTemplate<T> {
         }
     }
 
-    public T queryForObject(String sql, PreparedStatementSetter pstmtSetter, RowMapper<T> rowMapper) {
+    public T queryForObject(String sql, RowMapper<T> rowMapper, Object... parameters) {
 
         try (Connection con = ConnectionManager.getConnection(); PreparedStatement pstmt = con.prepareStatement(sql)) {
             T result = null;
-            pstmtSetter.setValues(pstmt);
+            setParameters(pstmt, parameters);
 
             try (ResultSet rs = pstmt.executeQuery()) {
                 if (rs.next()) {
@@ -66,6 +66,12 @@ public class JdbcTemplate<T> {
             return result;
         } catch (SQLException e) {
             throw new DataAccessException(e);
+        }
+    }
+
+    private void setParameters(PreparedStatement pstmt, Object[] parameters) throws SQLException {
+        for (int index = 0; index < parameters.length; index++) {
+            pstmt.setObject(index + 1, parameters[index]);
         }
     }
 }
