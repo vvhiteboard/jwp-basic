@@ -12,66 +12,56 @@ public class UserDao {
     public void insert(User user) throws SQLException {
         String sql = "INSERT INTO USERS VALUES (?, ?, ?, ?)";
 
-        JdbcTemplate jdbcTemplate = new JdbcTemplate() {
-            @Override
-            void setValues(PreparedStatement pstmt) throws SQLException {
-                pstmt.setString(1, user.getUserId());
-                pstmt.setString(2, user.getPassword());
-                pstmt.setString(3, user.getName());
-                pstmt.setString(4, user.getEmail());
-            }
+        JdbcTemplate<User> jdbcTemplate = new JdbcTemplate();
+
+        PreparedStatementSetter<User> pstmtSetter = (PreparedStatement pstmt) -> {
+            pstmt.setString(1, user.getUserId());
+            pstmt.setString(2, user.getPassword());
+            pstmt.setString(3, user.getName());
+            pstmt.setString(4, user.getEmail());
         };
 
-        jdbcTemplate.update(sql);
+        jdbcTemplate.update(sql, pstmtSetter);
     }
 
     public void update(User user) throws SQLException {
         String sql = "UPDATE USERS SET name = ?, email = ? WHERE userId = ?";
 
-        JdbcTemplate jdbcTemplate = new JdbcTemplate() {
-            @Override
-            void setValues(PreparedStatement pstmt) throws SQLException {
-                pstmt.setString(1, user.getName());
-                pstmt.setString(2, user.getEmail());
-                pstmt.setString(3, user.getUserId());
-            }
+        JdbcTemplate<User> jdbcTemplate = new JdbcTemplate<>();
+
+        PreparedStatementSetter<User> pstmtSetter = (PreparedStatement pstmt) -> {
+            pstmt.setString(1, user.getName());
+            pstmt.setString(2, user.getEmail());
+            pstmt.setString(3, user.getUserId());
         };
 
-        jdbcTemplate.update(sql);
+        jdbcTemplate.update(sql, pstmtSetter);
     }
 
     public List<User> findAll() throws SQLException {
         String sql = "SELECT userId, name, email FROM USERS";
 
-        SelectJdbcTemplate<User> selectJdbcTemplate = new SelectJdbcTemplate<User>() {
-            @Override
-            void setValues(PreparedStatement pstmt) throws SQLException {
-            }
+        JdbcTemplate<User> jdbcTemplate = new JdbcTemplate<>();
 
-            @Override
-            User mapRow(ResultSet rs) throws SQLException {
-                return new User(rs.getString("userId"), "", rs.getString("name"), rs.getString("email"));
-            }
+        // FuntionalInterface 람다식으로 함수형 인터페이스 정의
+        PreparedStatementSetter<User> pstmtSetter = (PreparedStatement pstmt) -> {
         };
+        RowMapper<User> userRowMapper = (ResultSet resultSet) -> new User(resultSet.getString("userId"), "", resultSet.getString("name"), resultSet.getString("email"));
 
-        return selectJdbcTemplate.query(sql);
+        jdbcTemplate.query(sql, pstmtSetter, userRowMapper);
+
+        return jdbcTemplate.query(sql, pstmtSetter, userRowMapper);
     }
 
     public User findByUserId(String userId) throws SQLException {
         String sql = "SELECT userId, password, name, email FROM USERS WHERE userid=?";
 
-        SelectJdbcTemplate<User> selectJdbcTemplate = new SelectJdbcTemplate<User>() {
-            @Override
-            void setValues(PreparedStatement pstmt) throws SQLException {
-                pstmt.setString(1, userId);
-            }
+        JdbcTemplate<User> jdbcTemplate = new JdbcTemplate<>();
 
-            @Override
-            User mapRow(ResultSet rs) throws SQLException {
-                return new User(rs.getString("userId"), rs.getString("password"), rs.getString("name"), rs.getString("email"));
-            }
-        };
+        // FuntionalInterface 람다식으로 함수형 인터페이스 정의
+        PreparedStatementSetter<User> pstmtSetter = (PreparedStatement pstmt) -> pstmt.setString(1, userId);
+        RowMapper<User> userRowMapper = (ResultSet resultSet) -> new User(resultSet.getString("userId"), "", resultSet.getString("name"), resultSet.getString("email"));
 
-        return selectJdbcTemplate.queryForObject(sql);
+        return jdbcTemplate.queryForObject(sql, pstmtSetter, userRowMapper);
     }
 }
