@@ -15,7 +15,7 @@ public class ShowController extends AbstractController {
         QuestionDao questionDao = new QuestionDao();
         AnswerDao answerDao = new AnswerDao();
 
-        ModelAndView modelAndView = jsonView();
+        ModelAndView modelAndView = jspView("/qna/show.jsp");
         modelAndView.addObject("question", questionDao.findById(questionId));
         modelAndView.addObject("answers", answerDao.findAllByQuestionId(questionId));
 
